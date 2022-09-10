@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 120
+max-complexity = 10
+
+per-file-ignores =
+    tests/*:E501
+    # imported but unused
+    __init__.py: F401
+
+exclude =
+    .git,
+    __pycache__,
+    docs/*
