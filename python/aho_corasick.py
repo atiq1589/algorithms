@@ -1,25 +1,20 @@
 # Add some code
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Generator, List, Optional, Tuple, DefaultDict
 from functools import wraps
+from typing import DefaultDict, Generator, List, Optional, Tuple
 
 
-# @dataclass
-# class TrieNode:
-#     children: DefaultDict[str, "TrieNode"] = field(default_factory=lambda: defaultdict(lambda: TrieNode()))
-#     suffix_link: Optional["TrieNode"] = None
-#     output_link: Optional["TrieNode"] = None
-#     dict_word_idx: Optional[int] = None
-
+@dataclass
 class TrieNode:
-    def __init__(self):
-        self.children: DefaultDict[str, "TrieNode"] = defaultdict(lambda: TrieNode())
-        self.suffix_link: Optional["TrieNode"] = None
-        self.output_link: Optional["TrieNode"] = None
-        self.dict_word_idx: Optional[int] = None
+    children: DefaultDict[str, "TrieNode"] = field(default_factory=lambda: defaultdict(lambda: TrieNode()))
+    suffix_link: Optional["TrieNode"] = None
+    output_link: Optional["TrieNode"] = None
+    dict_word_idx: Optional[int] = None
+
 
 class AhoCorasick:
+
     def __init__(self, dictionary: List[str]):
         self._dictionary = dictionary
         self._trie_root = TrieNode()
@@ -53,6 +48,7 @@ class AhoCorasick:
             self._add_to_trie(word, i)
 
     def _prepare_aho(func):
+
         @wraps(func)
         def wrapper(self, *args, **kwrgs):
             if not self._tree_build_complete:
@@ -124,12 +120,6 @@ def solution(text: str, dictionary: List[str]) -> List[int]:
 
 if __name__ == "__main__":
     text = "ababacbabc"
-    dictionary = [
-        "aba",
-        "ba",
-        "ac",
-        "a",
-        "abc"
-    ]
+    dictionary = ["aba", "ba", "ac", "a", "abc"]
     for result in solution(text, dictionary):
         print(result)
