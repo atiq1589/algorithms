@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -142,10 +142,18 @@ class SuffixTree:
                     self._active_point.edge += 1
                     self._active_point.length -= 1
 
+    def _set_suffix_start_index(self, tree_node: TreeNode, path_size):
+        if not tree_node.children:
+            tree_node.suffix_start_idx = len(self._text) - path_size
+
+        for child in tree_node.children.values():
+            self._set_suffix_start_index(child, path_size + child.size)
+
     def _ukkonen(self):
         for i, char in enumerate(self._text):
             self._global_end.value = i
             self._extension(i, char)
+        self._set_suffix_start_index(self._tree_root, 0)
 
     def search(self, word: str) -> bool:
         _active_edge_start = -1
@@ -190,12 +198,14 @@ class SuffixTree:
         print("END")
 
 
-def dfs(node: TreeNode):
+def dfs(node: TreeNode, idx_list: Optional[List[int]] = None):
     if not node.children:
+        if idx_list is not None:
+            idx_list.append(node.suffix_start_idx)
         return 1
     res = 0
     for child in node.children.values():
-        res += dfs(child)
+        res += dfs(child, idx_list)
     return res
 
 
@@ -243,9 +253,13 @@ if __name__ == "__main__":
         "dkifwmygdqlwmhybztltebaqfnsfbuuexgdogzoonqggswbgstptlvpcntzpiplxlqfovwmxqnquatgxftxmwtgoevauybyqfposuvnqfmihjslfinmxrpfktlxrwunasnnmcibeaxtygbwpwikrwfppeezetjkobrsbnhiqdfqahorkruzxlxnhuyymxcyjczjidkynbnrusmxlvvdzlnkvlxfplmglaavqlhzdxlehxlpnozhkehjeghmqgjyxyrqquxnzvjnqyzzfbmrstitlkezrupooudqbbsqdqvkxhahkfuveluzjhsvnkgqhtdusyzejvnapekhwmjemlsseohwbvcwjafgurnbagyuqxqqmezlhhprrfakntoplvkcmsczzbinhutjlvtqafrkezvsojocwtcjunebtvcvywhaehhpnxktrfbkeynpuqyrzqvezcesguxtgwzwplzenxbgeazegfivmojiripxihriemtnehbqvezpiprfnxnlaexxtnlhkhvtjjhufgwcsbdelyrjkucburgkdelxxgdptntvktzetyrxmahnithuixwdcfxjvvtltotimheywqlyampfecpefveaipmvenzbdsufogrmpeotczwvdeosbgmgrxupfhivvbqslgmltamsctstxgzwhegrdcupuqqkgekqksdcqrxrlgiwjjoihlahrsqzrwasnmokbngilefshlbuzlcrekmbjvnxcnjfuovsrepuzjkexrfxmoinvgfhibiioixsxufuygkznsmwnquiucfydrbsmimpjmonfobdbnumykrtclciqratbyfwgssoozmpqxhhmhdmighvbbrfltlozsyrjmubnlvoxweeitmmycmvmqmlbrjhoywmsbtdjxcckeynqwqyanvjmvgdpwidoypdckxwhjzibfwwquemqqkjxchzbbegpcjcwpwkulfyflabigbsjktwsgyhaasfctscprqinveuzqylfjpduhwknibxglvecovvtijklqxtvmiurnbowxfnhuyqkfefuqudhbrspdyhfdahpyejivkxndjyjbmxjpcxmvsddkasmlqoejqwgifhgmytwuvgdylotuyjuofjmcgztzmhshnojhkzgenzqyymtjobdyecyivrhxwtjiyickfobufaklnpjaedtizsxgronambzcjzibkfardxydynaepdpdximtiqwkvgpeartzuhttwjyfkikiwcstgheysynjldeocxduxlevrouinkagxuvtgdxrzrsattdwskvgfxqtzaesuvgdkckulteereqqhdxdqgsrmnmthsxknddcgiykrobiobirmisapppoeqektmlzlofjiwzauifiluleirrwzlvxaiugcsbdkeetwfxfozukqrmoxcmzmuqcpvzdibbvmaqcjhxjcknnwgmnftlddbaxbqwjnwkuujebpkeckdrmoisywcfamnevxoxvhzdgffmrarsvgochobscvcpqvemfdjpmywjkhyeqsabnoivxgjdxxsslakdoxiexkppdnrudjzkhackncqqcmolfhasynqasxeappurlrrjcwlcvcpyexskodamxjmbfhbflqvdkgofcajfurnwncydsqseosisbkyolirisdvixqqarjifttnlsxxucelbxbmiaumihuowkryienughakqbkvlqyfjjikixfgajnleglvuqjbwafmxmubhsjkcezpzehiwqcjfpoubrwjklccjvbtqelfpzibeifqhclqvwgpokcbqcybhwfzpyealudeutpxfhyxiotyiksgxwtgyemshuudbaybmayjtzbsbbplpdgmkqagsefiasplwadzfmkyyenncyohuqtjqguwwtmxefdwjefrkblhzmztwyviypjygjlogbogqggkjxuvfmnytrncohjoydblddpysigdxaduofihbaijfkscjcsapzfaspzqbuqmpvwalrzlftgxycergpdxmfbabxsdgxoexgxxmoxxoihikcdefzsvgqzppmegyrqkpxyzbkwodeucgevcxlhuzrleedejmiqgbdbyqqwhqxhubadhungfgcuvkqgmisnclnwlrszbmsudgvttjmusaczeeemlmdowvbtmvlfzlvbfmyofemtniccsxwkbzwlcoupvxqnxcnsgingnkoqcmysrxpavhozmmqipcedvjjdofrypcnhekutsqdukbucyiatfqdjjnhwnlngcnkvcuvtphkqzgeyybxnpktrshypffnowejqmgogesfifrkzovjqzdghjiwcshodbvmcmrokaevtnbvrmelafckzknuswqtwqpqyyviznakngyscpowyjenxdixlpmgjsdobdpkevxpvtvmzuxyxskcuvqzxheqvbqdncwaxmgnqyibqnognptcasjpirtskzvtdtzdhtowzrcfsefbfetapmheaarsguttxwhyjtanbipawaxfvpbmvpzgmqjmtgvepxxjjqolqyccijckjoicsgasdxbzjowqleobpsbevmopahkfrirdecmthiakurdxvyophzpdfetplyghrwnobxnnxfgiazwahcqpregvqmikspbpditipdebveirbiisluwkgwtipudojhblhuorycibrbvbvgqsdafgmtrwetrmvmaemyikpjlhfztchkdcgllofvwodqgpustlejoaywuprrrbpxaqejqxkqozfijsihsoarkhtragldtgrpkucwyjprmgsmnhtguqdgheavumrxkzpuyottypcciphphubugpjntjvrnrsnexxeoovaoqvfvoqyocevbyutxyktjagioqhepeaqsevpdbqauiabyqxquytpsggtxznuternypqfooviojdoilpoitlghplscdqonczbdjwdwtliarknabcswbaugezlioqhbdajqdsvleqqrexqorpkmailawwkwxdmhkflcrqxqbewlkexdyuqbzndwtngrhbtjmenqbwgmigfvffvttngbljxjeflfjiucdzksuslebdconeaulujbkigwwatlxescrwyupapwajhgqzbxwjdavukadllyhbldpnlnydzljdkkikezueuzzljilmodivxtmsodhsboxfrsrilucpyzmpxovpwbbzojfmnjvlnedtfdebnonvvwbhvxsspnqvvzsvbwzpisolwnwdmgaeorgjvqnxjawujxyakdiktyqtofqutwhlckodnajsgnehwduukhzuqzhpyummqlipuhmbbcqlqgaockwnkyuxtbauntabbcpqezobbxezhwhhpmvzohhpbekcvdzhvgquufzfuqkeblcjyyxmzstiqnxgeoigcwrczsqrrkneedpsrieslezfwpwlpbkqmlzpdrtwfvxdajbduffymfyyajcvqsgwqatzmqemscflacpoqquktwcockpqvkemthyzxtgnmhuwletkmqbsakdccwozgryvczclwlnrjugcxqttwioptrzmppqfokpwffybsinwwqkeeuwbgnwtfzmsvibwcywuoeohdfysyanhrvpixcmwbbaylrwxsrdszlvdzdjttwjncdpohjgawzvmrbxkogegkpuhlkknjryjjptmefdqsmndphzxsxcdebzrhscwultlsuhymtacplmjyupudtrulmphegsphxlvekfxeilspjhiknffluzrtrsakepcrdnlohugrvbxohjkdcseufwlsupsvzrvwoizukhvxjsljchzsmpbzltcbsjpoikcutsqmrkmcfvslpddwrsmzlvqakqlbelznxbiubchirnmbnxuzehmwuesllfsgyvsnjgwtjskikgtgkayhlqncosurybeszxrjlancyowkufwervncrlywahvvgynrwtjkmxxljqjmjdibbsuuvmggikznghmvkusuqaailbwjmyxnbufcvxyozflhunrxxtwzdyafnubfesihmuzjsqbcfypobicfgazykbvdeyfphcpozdzfwhfrnwpmcopgfjnlekyewewovdcodfnumfzuaelheieomzygzsduoghhfwrjsoloapmlicxikthdwfgyppfovogyvskarfcubesiwogbxqmagqnvlnwnupgdmhtnetlxoeahsntyeunlmgkbrfpvcstsslialfwbeigvvpkicroqmhnbccgiqcwbvnybhdqcqeucbqcxqniqrhleixzqntxwtibhbazkkpssbkjvmdvwbrvublhnapqtugddtqvqpkjyucrphclzlydzesmjtkzmtmgvziicllbzjlwyemmugbpboqbgjqqjbbcxqdqqfzjbnzsyqiwetdifxgyaodtzpvblmrxzpescefilwbfonkbrbtgpokarpxtekvyhwrcvtaablrbffmqvzxvjsioiyefbgljjnhpuymvdsqhcevsaxhbtrkxejawbeehgrinfaycvrzrdglzomqbizmvxnkunsnbbnjwulctrtgtscnlgdoksrvcgpskaiupohjxoebcitbvxrssaxeyjrpmdjrgvdyfrqoteeepomilrmoaurleswdjusgknawmefymmnvomfcnxgczzqlmtigjqefszfefbtudqofjbffldofbtjehcygeuehnbzpaategslyosvmvlfhnrwnrhpsloamxtqaixqgfrjpovukznoxjvubztygaelzlsadpdrwwvqntpgmugobuhyrwfynueqlywcgpfdfdytgnjgwuyjmnobsgrluiissmjvkaljtmnvnefukuhydwasiarkjkhinmirqolblenvxapccbkgsprcpmtepwssbbtppxiqkfsqcbudygosqhqwsdymllvximffazqphcestdmqaetjofpsclhbxmuqhkajhkrdewugxnkjuntlwrmzpocu",
     ]
     for word in words:
+        idx_list = []
         instance = SuffixTree(word)
         instance._ukkonen()
-        print(dfs(instance._tree_root), len(instance._text))
+        res = dfs(instance._tree_root, idx_list)
+        # print(idx_list)
+        idx_list = [n for n in idx_list if n >= 0]
+        print(res, len(instance._text), len(idx_list), len(set(idx_list)), set(idx_list) - set(range(1, 5002)))
     # SuffixTree(words[0])._ukkonen()
     # SuffixTree(words[1])._ukkonen()
     # SuffixTree(words[2])._ukkonen()
